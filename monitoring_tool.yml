@@ -1,0 +1,27 @@
+# monitoring_tool.yml
+---
+- name: Install and Configure Monitoring System (Prometheus)
+  hosts: all
+  become: yes
+  vars_files:
+    - config.yaml
+
+  tasks:
+    - name: Install Prometheus on Debian-based systems
+      apt:
+        name: prometheus={{ prometheus.version }}
+        state: present
+      when: ansible_os_family == "Debian" and prometheus.enabled
+
+    - name: Install Prometheus on CentOS-based systems
+      yum:
+        name: prometheus-{{ prometheus.version }}
+        state: present
+      when: ansible_os_family == "RedHat" and prometheus.enabled
+
+    - name: Start Prometheus service
+      service:
+        name: "{{ prometheus.service_name }}"
+        state: started
+        enabled: "{{ prometheus.enabled_at_boot }}"
+      when: prometheus.enabled and prometheus.start_service

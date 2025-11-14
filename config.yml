@@ -1,0 +1,17 @@
+nginx:
+  enabled: true
+  version: "latest"
+  service_name: "nginx"
+  config_file: "/etc/nginx/nginx.conf"
+  start_service: true
+  enabled_at_boot: true
+
+prometheus:
+  enabled: true
+  version: "2.30.0"
+  service_name: "prometheus"
+  config_file: "/etc/prometheus/prometheus.yml"
+  start_service: true
+  enabled_at_boot: true
+
+motd_message: "Ansible Managed by {{ ansible_user }}"
