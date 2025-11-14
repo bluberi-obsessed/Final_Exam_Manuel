@@ -1,5 +1,5 @@
-# ent.service.yml
 ---
+
 - name: Install and Configure Services (Nginx)
   hosts: all
   become: yes
@@ -9,15 +9,15 @@
   tasks:
     - name: Install Nginx on Debian-based systems
       apt:
-        name: nginx={{ nginx.version }}
+        name: "nginx={{ nginx.version }}"
         state: present
-      when: ansible_os_family == "Debian" and nginx.enabled
+      when: ansible_os_family == "Debian"
 
     - name: Install Nginx on CentOS-based systems
       yum:
-        name: nginx-{{ nginx.version }}
+        name: "nginx-{{ nginx.version }}"
         state: present
-      when: ansible_os_family == "RedHat" and nginx.enabled
+      when: ansible_os_family == "RedHat"
 
     - name: Start Nginx service
       service:
