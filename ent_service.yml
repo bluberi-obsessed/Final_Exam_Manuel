@@ -1,27 +1,41 @@
----
-
-- name: Install and Configure Services (Nginx)
+- name: "Install and Configure Service (Nginx)"
   hosts: all
   become: yes
+  gather_facts: yes
   vars_files:
-    - config.yaml
+    - config.yml
 
   tasks:
-    - name: Install Nginx on Debian-based systems
+    - name: "Debug: show loaded nginx var"
+      debug:
+        var: nginx
+
+    - name: "Ensure package name expression (Ubuntu)"
+      set_fact:
+        nginx_pkg_name: "{{ 'nginx=' + (nginx.version | default('')) if (nginx.version | default('') | length) > 0 else 'nginx' }}"
+      when: ansible_facts['distribution'] == 'Ubuntu' and (nginx | default({})).get('enabled', False)
+
+    - name: "Ensure package name expression (CentOS)"
+      set_fact:
+        nginx_pkg_name: "{{ 'nginx-' + (nginx.version | default('')) if (nginx.version | default('') | length) > 0 else 'nginx' }}"
+      when: ansible_facts['distribution'] == 'CentOS' and (nginx | default({})).get('enabled', False)
+
+    - name: "Install Nginx on Ubuntu"
       apt:
-        name: "nginx={{ nginx.version }}"
+        name: "{{ nginx_pkg_name | default('nginx') }}"
         state: present
-      when: ansible_os_family == "Debian"
+        update_cache: yes
+      when: ansible_facts['distribution'] == 'Ubuntu' and (nginx | default({})).get('enabled', False)
 
-    - name: Install Nginx on CentOS-based systems
+    - name: "Install Nginx on CentOS"
       yum:
-        name: "nginx-{{ nginx.version }}"
+        name: "{{ nginx_pkg_name | default('nginx') }}"
         state: present
-      when: ansible_os_family == "RedHat"
+      when: ansible_facts['distribution'] == 'CentOS' and (nginx | default({})).get('enabled', False)
 
-    - name: Start Nginx service
+    - name: "Start Nginx service"
       service:
-        name: "{{ nginx.service_name }}"
+        name: "{{ nginx.service_name | default('nginx') }}"
         state: started
-        enabled: "{{ nginx.enabled_at_boot }}"
-      when: nginx.enabled and nginx.start_service
+        enabled: "{{ nginx.enabled_at_boot | default(True) }}"
+      when: (nginx | default({})).get('enabled', False) and (nginx | default({})).get('start_service', False)

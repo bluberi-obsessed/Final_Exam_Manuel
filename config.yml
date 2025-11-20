@@ -1,6 +1,6 @@
 nginx:
   enabled: true
-  version: "latest"
+  version: ""                # empty = install latest available
   service_name: "nginx"
   config_file: "/etc/nginx/nginx.conf"
   start_service: true
